@@ -4,7 +4,7 @@ name: Test Summary PR comment
 on:
   workflow_run:
     # do NOT use quotes: https://stackoverflow.com/a/72551795/17876693
-    workflows: [ROOT CI TEST]
+    workflows: [ROOT CI]
     types:
       - completed
 permissions: {}
