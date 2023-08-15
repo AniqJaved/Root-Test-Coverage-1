@@ -128,13 +128,16 @@ jobs:
             echo '' >> "$FILE"
             echo $OVERRIDE >> "$FILE"
             cat "$FILE" || true
+
+        - name: Delete existing CodeQL database
+          run: rm -rf /__w/_temp/codeql_databases
+          
         
         # Initializes the CodeQL tools for scanning.
         - name: Initialize CodeQL
           uses: github/codeql-action/init@v2
           with:
             languages: 'cpp'
-            options: --overwrite
   
         # - name: Pull Request Build
         - name: Push Build
