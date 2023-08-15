@@ -19,6 +19,31 @@ on:
     branches: [ "codeql" ]
   schedule:
     - cron: '25 6 * * 3'
+  
+  workflow_call:
+    inputs:
+      head_ref:
+        type: string
+        required: true
+        default: master
+      base_ref:
+        type: string
+        required: true
+        default: master
+
+  # Enables manual start of workflow
+  workflow_dispatch:
+    inputs:
+      head_ref:
+        description: rebase from ...
+        type: string
+        required: true
+        default: master
+      base_ref:
+        description: ... to ... (can have same value)
+        type: string
+        required: true
+        default: master
 
 jobs:
   
@@ -67,7 +92,7 @@ jobs:
         - linux
         - x64
   
-      name: Build and test to determine coverage
+      name: Build and test to determine security
   
       container:
         image: registry.cern.ch/root-ci/fedora38:buildready
@@ -111,7 +136,7 @@ jobs:
             languages: 'cpp'
   
         # - name: Pull Request Build
-        - name: Push Request Build
+        - name: Push Build
           # if: github.event_name == 'pull_request'
           # env:
             # GITHUB_PR_ORIGIN: ${{ github.event.pull_request.head.repo.clone_url }}
