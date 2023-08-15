@@ -148,7 +148,6 @@ jobs:
                       --buildtype      Debug
                       --platform       fedora38
                       --incremental    false
-                      --base_ref       ${{ github.base_ref }}
                       --head_ref       refs/pull/${{ github.event.pull_request.number }}/head:${{ github.event.pull_request.head.ref }}
                       --repository     ${{ github.server_url }}/${{ github.repository }}
                 "
