@@ -165,3 +165,13 @@ jobs:
           uses: github/codeql-action/analyze@v2
           with:
             category: "/language:cpp"
+
+        - name: Package CodeQL Analysis Results
+          run: mkdir -p codeql-results && cp -r /__w/_temp/codeql_databases codeql-results
+          # This step creates a directory and copies the CodeQL database results into it.
+    
+        - name: Upload CodeQL Analysis Results
+          uses: actions/upload-artifact@v2
+          with:
+            name: codeql-results
+            path: /__w/root/results/cpp.sarif
