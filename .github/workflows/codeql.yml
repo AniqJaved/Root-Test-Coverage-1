@@ -140,18 +140,26 @@ jobs:
             languages: 'cpp'
   
         # - name: Pull Request Build
-        - name: Push Build
-          # if: github.event_name == 'pull_request'
-          # env:
-            # GITHUB_PR_ORIGIN: ${{ github.event.pull_request.head.repo.clone_url }}
-          run: ".github/workflows/root-ci-config/build_root.py
-                      --buildtype      Debug
-                      --platform       fedora38
-                      --incremental    false
-                      --head_ref       refs/pull/${{ github.event.pull_request.number }}/head:${{ github.event.pull_request.head.ref }}
-                      --repository     ${{ github.server_url }}/${{ github.repository }}
-                "
+        # - name: Push Build
+        #   # if: github.event_name == 'pull_request'
+        #   # env:
+        #     # GITHUB_PR_ORIGIN: ${{ github.event.pull_request.head.repo.clone_url }}
+        #   run: ".github/workflows/root-ci-config/build_root.py
+        #               --buildtype      Debug
+        #               --platform       fedora38
+        #               --incremental    false
+        #               --head_ref       refs/pull/${{ github.event.pull_request.number }}/head:${{ github.event.pull_request.head.ref }}
+        #               --repository     ${{ github.server_url }}/${{ github.repository }}
+        #         "
 
+        - name: Update artifacts after push to release branch
+          if:   github.event_name == 'push'
+          run: ".github/workflows/root-ci-config/build_root.py
+                    --buildtype      Debug
+                    --platform       fedora38
+                    --incremental    false
+                    --base_ref       ${{ github.ref_name }}
+                    --repository     ${{ github.server_url }}/${{ github.repository }}"
 
         - name: Perform CodeQL Analysis
           uses: github/codeql-action/analyze@v2
