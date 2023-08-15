@@ -134,8 +134,8 @@ def main():
     # We also want to upload any successful build, even if it fails testing
     # later on.
 
-    if not pull_request and not args.incremental and not args.coverage:
-        archive_and_upload(yyyy_mm_dd, obj_prefix)
+    # if not pull_request and not args.incremental and not args.coverage:
+    #     archive_and_upload(yyyy_mm_dd, obj_prefix)
 
     testing: bool = options_dict['testing'].lower() == "on" and options_dict['roottest'].lower() == "on"
 
