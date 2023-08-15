@@ -138,6 +138,7 @@ jobs:
           uses: github/codeql-action/init@v2
           with:
             languages: 'cpp'
+            options: --overwrite
   
         # - name: Pull Request Build
         # - name: Push Build
