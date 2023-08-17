@@ -13,7 +13,7 @@ name: "CodeQL"
 
 on:
   push:
-    branches: [ "codeql", "master" ]
+    branches: [ "codeql" ]
   pull_request:
     # The branches below must be a subset of the branches above
     branches: [ "codeql" ]
@@ -113,7 +113,7 @@ jobs:
   
         - name: Print debug info
           run:  'printf "%s@%s\\n" "$(whoami)" "$(hostname)";
-                 ls -la 
+                 ls -la
                 '
         
   
