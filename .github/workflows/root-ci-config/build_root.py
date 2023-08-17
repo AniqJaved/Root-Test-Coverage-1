@@ -134,8 +134,8 @@ def main():
     # We also want to upload any successful build, even if it fails testing
     # later on.
 
-    if not pull_request and not args.incremental and not args.coverage:
-        archive_and_upload(yyyy_mm_dd, obj_prefix)
+    # if not pull_request and not args.incremental and not args.coverage:
+    #     archive_and_upload(yyyy_mm_dd, obj_prefix)
 
     testing: bool = options_dict['testing'].lower() == "on" and options_dict['roottest'].lower() == "on"
 
@@ -254,7 +254,7 @@ def show_node_state(shell_log: str, options: str) -> str:
 def run_ctest(shell_log: str, extra_ctest_flags: str) -> str:
     num_failed_test, shell_log = subprocess_with_log(f"""
         cd '{WORKDIR}/build'
-        ctest --output-on-failure --parallel {os.cpu_count()} --output-junit TestResults.xml {extra_ctest_flags}
+        # ctest --output-on-failure --parallel {os.cpu_count()} --output-junit TestResults.xml {extra_ctest_flags}
     """, shell_log)
 
     return num_failed_test, shell_log

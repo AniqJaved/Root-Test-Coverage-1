@@ -1,0 +1,178 @@
+# For most projects, this workflow file will not need changing; you simply need
+# to commit it to your repository.
+#
+# You may wish to alter this file to override the set of languages analyzed,
+# or to provide custom queries or build logic.
+#
+# ******** NOTE ********
+# We have attempted to detect the languages in your repository. Please check
+# the `language` matrix defined below to confirm you have the correct set of
+# supported CodeQL languages.
+#
+name: "CodeQL"
+
+on:
+  push:
+    branches: [ "codeql", "master" ]
+  pull_request:
+    # The branches below must be a subset of the branches above
+    branches: [ "codeql" ]
+  schedule:
+    - cron: '25 6 * * 3'
+  
+  workflow_call:
+    inputs:
+      head_ref:
+        type: string
+        required: true
+        default: master
+      base_ref:
+        type: string
+        required: true
+        default: master
+
+  # Enables manual start of workflow
+  workflow_dispatch:
+    inputs:
+      head_ref:
+        description: rebase from ...
+        type: string
+        required: true
+        default: master
+      base_ref:
+        description: ... to ... (can have same value)
+        type: string
+        required: true
+        default: master
+
+jobs:
+  
+  # analyze:
+  #   name: Analyze
+  #   # Runner size impacts CodeQL analysis time. To learn more, please see:
+  #   #   - https://gh.io/recommended-hardware-resources-for-running-codeql
+  #   #   - https://gh.io/supported-runners-and-hardware-resources
+  #   #   - https://gh.io/using-larger-runners
+  #   # Consider using larger runners for possible analysis time improvements.
+  #   runs-on: ${{ (matrix.language == 'swift' && 'macos-latest') || 'ubuntu-latest' }}
+  #   # timeout-minutes: ${{ (matrix.language == 'swift' && 120) || 360 }}
+  #   # permissions:
+  #   #   actions: read
+  #   #   contents: read
+  #   #   security-events: write
+
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       language: [ 'cpp', 'csharp', 'go', 'javascript', 'python' ]
+  #       # CodeQL supports [ 'cpp', 'csharp', 'go', 'java', 'javascript', 'python', 'ruby', 'swift' ]
+  #       # Use only 'java' to analyze code written in Java, Kotlin or both
+  #       # Use only 'javascript' to analyze code written in JavaScript, TypeScript or both
+  #       # Learn more about CodeQL language support at https://aka.ms/codeql-docs/language-support
+
+    
+  #   # Initializes the CodeQL tools for scanning.
+  #   # - name: Initialize CodeQL
+  #   #   uses: github/codeql-action/init@v2
+  #   #   with:
+  #   #     languages: ${{ matrix.language }}
+  
+  
+  Analyze:
+    
+      # if: github.repository_owner == 'root-project' || github.event_name == 'pull_request'
+  
+      permissions:
+        contents: read
+        actions: read
+        security-events: write
+  
+      runs-on: 
+        - self-hosted
+        - linux
+        - x64
+  
+      name: Build and test to determine security
+  
+      container:
+        image: registry.cern.ch/root-ci/fedora38:buildready
+        options: '--security-opt label=disable --rm'
+        env:
+          OS_APPLICATION_CREDENTIAL_ID: '7f5b64a265244623a3a933308569bdba'
+          PYTHONUNBUFFERED: true
+  
+      steps:
+  
+        - name: Checkout
+          uses: actions/checkout@v3
+  
+        - name: Dump GitHub context
+          env:
+            GITHUB_CONTEXT: ${{ toJSON(github) }}
+          run: echo "$GITHUB_CONTEXT"
+  
+        - name: Print debug info
+          run:  'printf "%s@%s\\n" "$(whoami)" "$(hostname)";
+                 ls -la 
+                '
+        
+  
+        - name: Apply option override from matrix for this job
+          env:
+            OVERRIDE: "coverage=On"
+            FILE: .github/workflows/root-ci-config/buildconfig/fedora38.txt
+          shell: bash
+          run: |
+            set -x
+  
+            echo '' >> "$FILE"
+            echo $OVERRIDE >> "$FILE"
+            cat "$FILE" || true
+
+        - name: Delete existing CodeQL database
+          run: rm -rf /__w/_temp/codeql_databases
+          
+        
+        # Initializes the CodeQL tools for scanning.
+        - name: Initialize CodeQL
+          uses: github/codeql-action/init@v2
+          with:
+            languages: 'cpp'
+  
+        # - name: Pull Request Build
+        # - name: Push Build
+        #   # if: github.event_name == 'pull_request'
+        #   # env:
+        #     # GITHUB_PR_ORIGIN: ${{ github.event.pull_request.head.repo.clone_url }}
+        #   run: ".github/workflows/root-ci-config/build_root.py
+        #               --buildtype      Debug
+        #               --platform       fedora38
+        #               --incremental    false
+        #               --head_ref       refs/pull/${{ github.event.pull_request.number }}/head:${{ github.event.pull_request.head.ref }}
+        #               --repository     ${{ github.server_url }}/${{ github.repository }}
+        #         "
+
+        - name: Update artifacts after push to release branch
+          if:   github.event_name == 'push'
+          run: ".github/workflows/root-ci-config/build_root.py
+                    --buildtype      Debug
+                    --platform       fedora38
+                    --incremental    false
+                    --base_ref       ${{ github.ref_name }}
+                    --repository     ${{ github.server_url }}/${{ github.repository }}"
+
+        - name: Perform CodeQL Analysis
+          uses: github/codeql-action/analyze@v2
+          with:
+            category: "/language:cpp"
+        
+        # This step creates a directory and copies the CodeQL database results into it.    
+        - name: Package CodeQL Analysis Results
+          run: mkdir -p codeql-results && cp -r /__w/_temp/codeql_databases codeql-results
+          
+    
+        - name: Upload CodeQL Analysis Results
+          uses: actions/upload-artifact@v2
+          with:
+            name: codeql-results
+            path: /__w/root/results/cpp.sarif
