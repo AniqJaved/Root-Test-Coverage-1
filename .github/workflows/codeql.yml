@@ -138,6 +138,7 @@ jobs:
           uses: github/codeql-action/init@v2
           with:
             languages: 'cpp'
+            queries: security-and-quality
   
         # - name: Pull Request Build
         # - name: Push Build
@@ -165,6 +166,7 @@ jobs:
           uses: github/codeql-action/analyze@v2
           with:
             category: "/language:cpp"
+        
         
         # This step creates a directory and copies the CodeQL database results into it.    
         - name: Package CodeQL Analysis Results
