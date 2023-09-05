@@ -12,8 +12,8 @@
 name: "CodeQL"
 
 on:
-  push:
-    branches: [ "codeql", "master" ]
+  # push:
+  #   branches: [ "codeql", "master" ]
   pull_request:
     # The branches below must be a subset of the branches above
     branches: [ "codeql" ]
@@ -80,7 +80,7 @@ jobs:
   
   Analyze:
     
-      # if: github.repository_owner == 'root-project' || github.event_name == 'pull_request'
+      if: github.repository_owner == 'root-project' || github.event_name == 'pull_request'
   
       permissions:
         contents: read
